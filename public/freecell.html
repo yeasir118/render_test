@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FreeCell Mobile</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #0b6623;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: start;
+      height: 100vh;
+      padding: 10px;
+    }
+
+    #game {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 5px;
+    }
+
+    .freecells, .homecells {
+      display: flex;
+      gap: 5px;
+    }
+
+    .cell {
+      width: 48px;
+      height: 64px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 2px dashed white;
+      border-radius: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .tableau {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 5px;
+    }
+
+    .column {
+      min-height: 100px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 4px;
+    }
+
+    .card {
+      width: 48px;
+      height: 64px;
+      background-color: white;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      margin-bottom: -40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 14px;
+      position: relative;
+      z-index: 1;
+      cursor: grab;
+    }
+
+    .red { color: red; }
+    .black { color: black; }
+
+    .drag-over {
+      outline: 2px dashed yellow;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <!-- Top area -->
+    <div class="top-row">
+      <div class="freecells">
+        <div class="cell" id="free-0"></div>
+        <div class="cell" id="free-1"></div>
+        <div class="cell" id="free-2"></div>
+        <div class="cell" id="free-3"></div>
+      </div>
+      <div class="homecells">
+        <div class="cell" id="home-0"></div>
+        <div class="cell" id="home-1"></div>
+        <div class="cell" id="home-2"></div>
+        <div class="cell" id="home-3"></div>
+      </div>
+    </div>
+
+    <!-- Tableau area -->
+    <div class="tableau" id="tableau">
+      <!-- Cards will be inserted by JavaScript -->
+    </div>
+  </div>
+
+  <script>
+    const suits = ['♠', '♥', '♦', '♣'];
+    const colors = { '♠': 'black', '♣': 'black', '♥': 'red', '♦': 'red' };
+    const values = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+
+    function createDeck() {
+      const deck = [];
+      for (const suit of suits) {
+        for (const value of values) {
+          deck.push({ suit, value, id: `${value}${suit}` });
+        }
+      }
+      return deck;
+    }
+
+    function shuffle(deck) {
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+    }
+
+    function dealToTableau(deck) {
+      const tableau = Array.from({ length: 8 }, () => []);
+      for (let i = 0; i < deck.length; i++) {
+        tableau[i % 8].push(deck[i]);
+      }
+      return tableau;
+    }
+
+    function renderTableau(tableau) {
+      const container = document.getElementById('tableau');
+      container.innerHTML = '';
+      tableau.forEach((col, colIndex) => {
+        const columnDiv = document.createElement('div');
+        columnDiv.className = 'column';
+        columnDiv.dataset.col = colIndex;
+        columnDiv.addEventListener('dragover', e => e.preventDefault());
+        columnDiv.addEventListener('drop', handleDrop);
+
+        col.forEach((card, i) => {
+          const cardDiv = document.createElement('div');
+          cardDiv.className = `card ${colors[card.suit]}`;
+          cardDiv.textContent = `${card.value}${card.suit}`;
+          cardDiv.draggable = i === col.length - 1; // only top card draggable
+          cardDiv.dataset.id = card.id;
+          cardDiv.dataset.col = colIndex;
+          cardDiv.addEventListener('dragstart', handleDragStart);
+          columnDiv.appendChild(cardDiv);
+        });
+
+        container.appendChild(columnDiv);
+      });
+    }
+
+    function getValueIndex(value) {
+      return values.indexOf(value);
+    }
+
+    function isValidMove(card1, card2) {
+      if (!card2) return true; // empty column
+      const color1 = colors[card1.suit];
+      const color2 = colors[card2.suit];
+      return color1 !== color2 && getValueIndex(card1.value) + 1 === getValueIndex(card2.value);
+    }
+
+    function handleDragStart(e) {
+      e.dataTransfer.setData("text/plain", e.target.dataset.id);
+    }
+
+    function handleDrop(e) {
+      const draggedId = e.dataTransfer.getData("text/plain");
+      const draggedCard = findCardById(draggedId);
+      const fromCol = parseInt(document.querySelector(`[data-id='${draggedId}']`).dataset.col);
+      const toCol = parseInt(e.currentTarget.dataset.col);
+      const targetCol = tableau[toCol];
+      const topCard = targetCol[targetCol.length - 1];
+
+      if (isValidMove(draggedCard, topCard)) {
+        tableau[fromCol].pop();
+        tableau[toCol].push(draggedCard);
+        renderTableau(tableau);
+      }
+    }
+
+    function findCardById(id) {
+      for (const col of tableau) {
+        for (const card of col) {
+          if (card.id === id) return card;
+        }
+      }
+    }
+
+    const deck = createDeck();
+    shuffle(deck);
+    const tableau = dealToTableau(deck);
+    renderTableau(tableau);
+  </script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catch the Star</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      height: 100vh;
+      background: linear-gradient(to bottom, #4facfe, #00f2fe);
+      font-family: 'Arial Rounded MT Bold', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #game-container {
+      width: 360px;
+      height: 640px;
+      background-color: #fff8dc;
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    #score {
+      position: absolute;
+      top: 20px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: #ff6347;
+    }
+
+    .star {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: gold;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #ffa500;
+      animation: drop linear;
+    }
+
+    @keyframes drop {
+      to {
+        transform: translateY(640px);
+      }
+    }
+
+    #start-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #ffd700;
+      border: none;
+      padding: 14px 32px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #game-over {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      font-weight: bold;
+      color: #ff4500;
+      display: none;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="score">Score: 0</div>
+    <button id="start-btn">Start Game</button>
+    <div id="game-over">Game Over!<br><button onclick="startGame()" style="margin-top:10px" class="btn">Play Again</button></div>
+  </div>
+
+  <script>
+    const container = document.getElementById('game-container');
+    const scoreDisplay = document.getElementById('score');
+    const startBtn = document.getElementById('start-btn');
+    const gameOverText = document.getElementById('game-over');
+
+    let score = 0;
+    let gameRunning = false;
+    let dropInterval;
+
+    function randomX() {
+      return Math.random() * (container.clientWidth - 40);
+    }
+
+    function createStar() {
+      const star = document.createElement('div');
+      star.classList.add('star');
+      star.style.left = `${randomX()}px`;
+      star.style.top = '-40px';
+      star.style.animationDuration = `${2 + Math.random() * 2}s`;
+
+      container.appendChild(star);
+
+      star.addEventListener('click', () => {
+        if (!gameRunning) return;
+        score++;
+        scoreDisplay.textContent = `Score: ${score}`;
+        star.remove();
+      });
+
+      setTimeout(() => {
+        if (container.contains(star)) {
+          endGame();
+        }
+      }, parseFloat(star.style.animationDuration) * 1000);
+    }
+
+    function startGame() {
+      score = 0;
+      gameRunning = true;
+      scoreDisplay.textContent = 'Score: 0';
+      startBtn.style.display = 'none';
+      gameOverText.style.display = 'none';
+
+      dropInterval = setInterval(createStar, 1000);
+    }
+
+    function endGame() {
+      gameRunning = false;
+      clearInterval(dropInterval);
+      document.querySelectorAll('.star').forEach(s => s.remove());
+      gameOverText.style.display = 'block';
+    }
+
+    startBtn.addEventListener('click', startGame);
+  </script>
+</body>
+</html>
