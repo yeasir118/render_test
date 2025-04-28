@@ -1,0 +1,54 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.2rem;
+}
+
+.container h1 {
+  text-align: center;
+  margin: 30px;
+  letter-spacing: 1px;
+}
+
+#form {
+  border: 1px solid black;
+  border-radius: 8px;
+  width: 20%;
+  margin: 5px auto;
+}
+
+#form label {
+  display: block;
+  margin: 5px;
+  margin-left: 20px;
+}
+
+#form input {
+  width: 90%;
+  margin-left: 20px;
+  padding: 5px;
+}
+
+.input-group {
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+#files {
+  margin: 10px;
+  margin-left: 100px;
+}
+
+.submit-btn {
+  margin: 10px 130px;
+  padding: 8px 20px;
+}
+
+.submit-btn:hover {
+  cursor: pointer;
+}

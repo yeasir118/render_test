@@ -1,10 +1,19 @@
 
-POST http://localhost:3000/login/register
+POST https://render-test-yqkl.onrender.com/login
 Content-Type: application/json
 
 {
   "username": "admin",
   "password": "password"
+}
+
+###
+POST http://localhost:3000/login/register
+Content-Type: application/json
+
+{
+  "username": "aorko",
+  "password": "aorko"
 }
 
 ###
