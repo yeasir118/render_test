@@ -12,10 +12,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
+app.use('/games', express.static('uploads'));
+
 app.use('/login', loginRouter);
 app.use('/upload_files', fileUploadRouter);
 
+app.get('/', (req, res) => {
+  res.send('Welcome!');
+});
+
 // global error handler
+// put it at the last of all route handlers
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(400).json({
