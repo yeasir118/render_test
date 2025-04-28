@@ -39,6 +39,13 @@ body {
   margin-bottom: 20px;
 }
 
+.input-group textarea {
+  width: 90%;
+  margin-left: 20px;
+  padding: 5px;
+  font-size: 0.8rem;
+}
+
 #files {
   margin: 10px;
   margin-left: 100px;
